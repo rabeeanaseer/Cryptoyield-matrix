@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "x8k_7bKU_RfAv2eGMPMiD"
-uri = "file://cryptoyields-github.tar.gz"
-type = "unspecified"
-title = "CryptoYield — GitHub Upload Package"
