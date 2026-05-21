@@ -1,0 +1,832 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: CryptoYield API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: chains
+    description: Blockchain chain operations
+  - name: assets
+    description: Token/asset operations
+  - name: protocols
+    description: Protocol operations
+  - name: pools
+    description: Yield pool operations
+  - name: compare
+    description: Protocol comparison operations
+  - name: blog
+    description: Blog article operations
+  - name: stats
+    description: Dashboard statistics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /chains:
+    get:
+      operationId: listChains
+      tags: [chains]
+      summary: List all supported chains
+      responses:
+        "200":
+          description: List of chains
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chain"
+
+  /chains/{chainName}:
+    get:
+      operationId: getChain
+      tags: [chains]
+      summary: Get chain details with top pools
+      parameters:
+        - name: chainName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chain detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChainDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assets:
+    get:
+      operationId: listAssets
+      tags: [assets]
+      summary: List all token assets
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asset"
+
+  /assets/{symbol}:
+    get:
+      operationId: getAsset
+      tags: [assets]
+      summary: Get asset details with pools
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Asset detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /protocols:
+    get:
+      operationId: listProtocols
+      tags: [protocols]
+      summary: List all yield protocols
+      responses:
+        "200":
+          description: List of protocols
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Protocol"
+
+  /protocols/{protocolName}:
+    get:
+      operationId: getProtocol
+      tags: [protocols]
+      summary: Get protocol profile with pools
+      parameters:
+        - name: protocolName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Protocol detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtocolDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /pools:
+    get:
+      operationId: listPools
+      tags: [pools]
+      summary: List yield pools with filters
+      parameters:
+        - name: chain
+          in: query
+          schema:
+            type: string
+        - name: token
+          in: query
+          schema:
+            type: string
+        - name: protocol
+          in: query
+          schema:
+            type: string
+        - name: minApy
+          in: query
+          schema:
+            type: number
+        - name: maxApy
+          in: query
+          schema:
+            type: number
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [apy, tvl, risk]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of pools
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PoolList"
+
+  /pools/{poolId}:
+    get:
+      operationId: getPool
+      tags: [pools]
+      summary: Get single pool details
+      parameters:
+        - name: poolId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pool detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pool"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /compare/{protocolA}/{protocolB}/{tokenSymbol}:
+    get:
+      operationId: compareProtocols
+      tags: [compare]
+      summary: Compare two protocols for a token
+      parameters:
+        - name: protocolA
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: protocolB
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tokenSymbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comparison result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComparisonResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /blog:
+    get:
+      operationId: listArticles
+      tags: [blog]
+      summary: List blog articles
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+
+  /blog/{slug}:
+    get:
+      operationId: getArticle
+      tags: [blog]
+      summary: Get blog article by slug with live data
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Article with embedded live data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      tags: [stats]
+      summary: Platform-wide aggregate stats
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+
+  /stats/top-yields:
+    get:
+      operationId: getTopYields
+      tags: [stats]
+      summary: Top yielding pools across all chains
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top yield pools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pool"
+
+  /stats/by-chain:
+    get:
+      operationId: getStatsByChain
+      tags: [stats]
+      summary: Pool counts and TVL grouped by chain
+      responses:
+        "200":
+          description: Per-chain stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChainStats"
+
+  /stats/by-token:
+    get:
+      operationId: getStatsByToken
+      tags: [stats]
+      summary: Average APY grouped by token symbol
+      responses:
+        "200":
+          description: Per-token stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TokenStats"
+
+  /data/refresh:
+    post:
+      operationId: triggerDataRefresh
+      tags: [stats]
+      summary: Manually trigger data refresh from DeFiLlama
+      responses:
+        "200":
+          description: Refresh triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshStatus"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Chain:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        poolCount:
+          type: integer
+        totalTvl:
+          type: number
+        avgApy:
+          type: number
+        topProtocols:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - slug
+        - poolCount
+        - totalTvl
+        - avgApy
+        - topProtocols
+
+    ChainDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        poolCount:
+          type: integer
+        totalTvl:
+          type: number
+        avgApy:
+          type: number
+        topProtocols:
+          type: array
+          items:
+            type: string
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pool"
+      required:
+        - name
+        - slug
+        - poolCount
+        - totalTvl
+        - avgApy
+        - topProtocols
+        - pools
+
+    Asset:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: ["string", "null"]
+        poolCount:
+          type: integer
+        avgApy:
+          type: number
+        maxApy:
+          type: number
+        totalTvl:
+          type: number
+        priceUsd:
+          type: ["number", "null"]
+      required:
+        - symbol
+        - name
+        - poolCount
+        - avgApy
+        - maxApy
+        - totalTvl
+        - priceUsd
+
+    AssetDetail:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: ["string", "null"]
+        poolCount:
+          type: integer
+        avgApy:
+          type: number
+        maxApy:
+          type: number
+        totalTvl:
+          type: number
+        priceUsd:
+          type: ["number", "null"]
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pool"
+      required:
+        - symbol
+        - name
+        - poolCount
+        - avgApy
+        - maxApy
+        - totalTvl
+        - priceUsd
+        - pools
+
+    Protocol:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        poolCount:
+          type: integer
+        totalTvl:
+          type: number
+        avgApy:
+          type: number
+        chains:
+          type: array
+          items:
+            type: string
+        riskScore:
+          type: ["string", "null"]
+      required:
+        - name
+        - slug
+        - poolCount
+        - totalTvl
+        - avgApy
+        - chains
+        - riskScore
+
+    ProtocolDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        poolCount:
+          type: integer
+        totalTvl:
+          type: number
+        avgApy:
+          type: number
+        chains:
+          type: array
+          items:
+            type: string
+        riskScore:
+          type: ["string", "null"]
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pool"
+      required:
+        - name
+        - slug
+        - poolCount
+        - totalTvl
+        - avgApy
+        - chains
+        - riskScore
+        - pools
+
+    Pool:
+      type: object
+      properties:
+        id:
+          type: string
+        project:
+          type: string
+        symbol:
+          type: string
+        chain:
+          type: string
+        tvlUsd:
+          type: number
+        apy:
+          type: number
+        apyBase:
+          type: ["number", "null"]
+        apyReward:
+          type: ["number", "null"]
+        il7d:
+          type: ["number", "null"]
+        riskScore:
+          type: string
+        stablecoin:
+          type: boolean
+        ilRisk:
+          type: string
+        exposure:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - project
+        - symbol
+        - chain
+        - tvlUsd
+        - apy
+        - apyBase
+        - apyReward
+        - il7d
+        - riskScore
+        - stablecoin
+        - ilRisk
+        - exposure
+        - updatedAt
+
+    PoolList:
+      type: object
+      properties:
+        pools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pool"
+        total:
+          type: integer
+      required:
+        - pools
+        - total
+
+    ComparisonResult:
+      type: object
+      properties:
+        protocolA:
+          $ref: "#/components/schemas/ProtocolCompareItem"
+        protocolB:
+          $ref: "#/components/schemas/ProtocolCompareItem"
+        tokenSymbol:
+          type: string
+        winner:
+          type: ["string", "null"]
+        summary:
+          type: string
+      required:
+        - protocolA
+        - protocolB
+        - tokenSymbol
+        - winner
+        - summary
+
+    ProtocolCompareItem:
+      type: object
+      properties:
+        name:
+          type: string
+        pool:
+          $ref: "#/components/schemas/Pool"
+        tvlUsd:
+          type: number
+        apy:
+          type: number
+        riskScore:
+          type: string
+      required:
+        - name
+        - pool
+        - tvlUsd
+        - apy
+        - riskScore
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: string
+        category:
+          type: string
+        authorName:
+          type: string
+        publishedAt:
+          type: string
+        readTime:
+          type: integer
+      required:
+        - id
+        - slug
+        - title
+        - excerpt
+        - category
+        - authorName
+        - publishedAt
+        - readTime
+
+    ArticleDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        authorName:
+          type: string
+        authorBio:
+          type: string
+        featuredImageUrl:
+          type: string
+          nullable: true
+        publishedAt:
+          type: string
+        readTime:
+          type: integer
+        relatedPools:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pool"
+      required:
+        - id
+        - slug
+        - title
+        - content
+        - category
+        - authorName
+        - authorBio
+        - publishedAt
+        - readTime
+        - relatedPools
+
+    StatsSummary:
+      type: object
+      properties:
+        totalPools:
+          type: integer
+        totalTvlUsd:
+          type: number
+        avgApy:
+          type: number
+        maxApy:
+          type: number
+        totalChains:
+          type: integer
+        totalProtocols:
+          type: integer
+        lastUpdated:
+          type: string
+      required:
+        - totalPools
+        - totalTvlUsd
+        - avgApy
+        - maxApy
+        - totalChains
+        - totalProtocols
+        - lastUpdated
+
+    ChainStats:
+      type: object
+      properties:
+        chain:
+          type: string
+        poolCount:
+          type: integer
+        totalTvl:
+          type: number
+        avgApy:
+          type: number
+      required:
+        - chain
+        - poolCount
+        - totalTvl
+        - avgApy
+
+    TokenStats:
+      type: object
+      properties:
+        symbol:
+          type: string
+        poolCount:
+          type: integer
+        avgApy:
+          type: number
+        maxApy:
+          type: number
+        totalTvl:
+          type: number
+      required:
+        - symbol
+        - poolCount
+        - avgApy
+        - maxApy
+        - totalTvl
+
+    RefreshStatus:
+      type: object
+      properties:
+        message:
+          type: string
+        poolsUpdated:
+          type: integer
+        timestamp:
+          type: string
+      required:
+        - message
+        - poolsUpdated
+        - timestamp
