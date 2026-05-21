@@ -16,5 +16,10 @@
   "env": {
     "NODE_ENV": "production",
     "BASE_PATH": "/"
+  },
+  "build": {
+    "env": {
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
   }
 }
