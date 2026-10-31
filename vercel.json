@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @workspace/api-spec run codegen && pnpm --filter @workspace/api-server run typecheck && node scripts/build-vercel-api.mjs && pnpm --filter @workspace/crypto-yield run build",
+  "outputDirectory": "artifacts/crypto-yield/dist/public",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/refresh",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "BASE_PATH": "/"
+  },
+  "build": {
+    "env": {
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
+  }
+}
