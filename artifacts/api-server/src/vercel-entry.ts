@@ -1,6 +1,5 @@
-import app from "./app";
-import { initDb } from "./lib/initDb";
-
-void initDb();
+import app from "./app.js";
+import { initDatabase } from "./lib/initDb.js";
 
 export default app;
+export { initDatabase };
